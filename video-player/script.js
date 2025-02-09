@@ -36,8 +36,10 @@ function loadVideo(file) {
     videoPlayer.play();
 }
 
-const { createFFmpeg, fetchFile } = FFmpeg;
-const ffmpeg = createFFmpeg({ log: true });
+// const { createFFmpeg, fetchFile } = FFmpeg;
+// const { createFFmpeg, fetchFile } = require('@ffmpeg/ffmpeg');
+// const ffmpeg = createFFmpeg({ log: true });
+// const ffmpeg = FFmpeg.createFFmpeg({ log: true });
 
 async function convertMKVtoMP4(file) {
     if (!ffmpeg.isLoaded()) await ffmpeg.load();
@@ -66,3 +68,56 @@ async function loadVideo(file) {
     }
     videoPlayer.play();
 }
+
+// Ensure all buttons are correctly selected
+const playPauseBtn = document.getElementById("playPause");
+const rewind10sBtn = document.getElementById("rewind10s");
+const forward10sBtn = document.getElementById("forward10s");
+const rewind1mBtn = document.getElementById("rewind1m");
+const forward1mBtn = document.getElementById("forward1m");
+const seekBar = document.getElementById("seekBar");
+
+// Debugging: Check if elements exist
+console.log(playPauseBtn, rewind10sBtn, forward10sBtn, rewind1mBtn, forward1mBtn);
+
+// Play/Pause Toggle
+playPauseBtn.addEventListener("click", () => {
+    if (videoPlayer.paused) {
+        videoPlayer.play();
+        playPauseBtn.innerText = "⏸️";
+    } else {
+        videoPlayer.pause();
+        playPauseBtn.innerText = "▶️";
+    }
+    console.log("Play/Pause Clicked"); // Debugging
+});
+
+// Forward & Rewind Controls
+rewind10sBtn.addEventListener("click", () => {
+    console.log("Rewind 10s Clicked");
+    videoPlayer.currentTime -= 10;
+});
+
+forward10sBtn.addEventListener("click", () => {
+    console.log("Forward 10s Clicked");
+    videoPlayer.currentTime += 10;
+});
+
+rewind1mBtn.addEventListener("click", () => {
+    console.log("Rewind 1m Clicked");
+    videoPlayer.currentTime -= 60;
+});
+
+forward1mBtn.addEventListener("click", () => {
+    console.log("Forward 1m Clicked");
+    videoPlayer.currentTime += 60;
+});
+
+// Seek Bar Functionality
+videoPlayer.addEventListener("timeupdate", () => {
+    seekBar.value = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+});
+
+seekBar.addEventListener("input", () => {
+    videoPlayer.currentTime = (seekBar.value / 100) * videoPlayer.duration;
+});
