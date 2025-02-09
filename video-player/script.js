@@ -181,3 +181,13 @@ fullscreenModeBtn.addEventListener("click", () => {
         document.exitFullscreen();
     }
 });
+
+const brightnessControl = document.getElementById("brightness");
+const contrastControl = document.getElementById("contrast");
+
+function updateFilters() {
+    videoPlayer.style.filter = `brightness(${brightnessControl.value}) contrast(${contrastControl.value})`;
+}
+
+brightnessControl.addEventListener("input", updateFilters);
+contrastControl.addEventListener("input", updateFilters);
