@@ -35,3 +35,34 @@ function loadVideo(file) {
     videoPlayer.src = fileURL;
     videoPlayer.play();
 }
+
+const { createFFmpeg, fetchFile } = FFmpeg;
+const ffmpeg = createFFmpeg({ log: true });
+
+async function convertMKVtoMP4(file) {
+    if (!ffmpeg.isLoaded()) await ffmpeg.load();
+
+    const fileName = "input.mkv";
+    const outputFileName = "output.mp4";
+
+    ffmpeg.FS("writeFile", fileName, await fetchFile(file));
+    await ffmpeg.run("-i", fileName, outputFileName);
+
+    const data = ffmpeg.FS("readFile", outputFileName);
+    const mp4Blob = new Blob([data.buffer], { type: "video/mp4" });
+
+    return URL.createObjectURL(mp4Blob);
+}
+
+// Modify `loadVideo` function to handle MKV files
+async function loadVideo(file) {
+    if (file.name.endsWith(".mkv")) {
+        console.log("MKV file detected, converting...");
+        const convertedVideoURL = await convertMKVtoMP4(file);
+        videoPlayer.src = convertedVideoURL;
+    } else {
+        const fileURL = URL.createObjectURL(file);
+        videoPlayer.src = fileURL;
+    }
+    videoPlayer.play();
+}
