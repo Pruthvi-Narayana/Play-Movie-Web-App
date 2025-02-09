@@ -89,7 +89,7 @@ seekBar.addEventListener("change", () => {
 // 🎯 Show thumbnail preview on hover (without seeking)
 seekBar.addEventListener("mousemove", (event) => {
     const now = Date.now();
-    if (now - lastUpdateTime < 300) return; // Update every 300ms
+    if (now - lastUpdateTime < 100) return; // Update every 300ms
     lastUpdateTime = now;
 
     const seekBarRect = seekBar.getBoundingClientRect();
@@ -162,4 +162,22 @@ seekBar.addEventListener("click", (event) => {
     const seekBarRect = seekBar.getBoundingClientRect();
     const seekTime = (event.offsetX / seekBarRect.width) * videoPlayer.duration;
     videoPlayer.currentTime = seekTime; // Seek only on click
+});
+
+
+const theaterModeBtn = document.getElementById("theaterMode");
+const fullscreenModeBtn = document.getElementById("fullscreenMode");
+
+// Toggle Theater Mode
+theaterModeBtn.addEventListener("click", () => {
+    document.body.classList.toggle("theater-mode");
+});
+
+// Toggle Fullscreen Mode
+fullscreenModeBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+        videoPlayer.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
 });
