@@ -63,3 +63,17 @@ button:hover {
     width: 100%;
     margin-top: 10px;
 }
+
+.thumbnail-preview {
+    position: fixed; /* Fixed positioning to follow cursor */
+    width: 120px;
+    height: 70px;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid white;
+    border-radius: 5px;
+    display: none;
+    pointer-events: none; /* Prevents interference with clicking */
+    z-index: 10; /* Ensures it stays above other elements */
+}
+
