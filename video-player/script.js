@@ -191,3 +191,39 @@ function updateFilters() {
 
 brightnessControl.addEventListener("input", updateFilters);
 contrastControl.addEventListener("input", updateFilters);
+
+
+const audioContext = new AudioContext();
+const source = audioContext.createMediaElementSource(videoPlayer);
+const gainNode = audioContext.createGain();
+source.connect(gainNode);
+gainNode.connect(audioContext.destination);
+
+const audioBoostControl = document.getElementById("audioBoost");
+
+audioBoostControl.addEventListener("input", () => {
+    let boostValue = parseFloat(audioBoostControl.value);
+    gainNode.gain.value = boostValue; // Boost up to 3x
+});
+
+const audioTracksSelect = document.getElementById("audioTracks");
+
+videoPlayer.addEventListener("loadedmetadata", () => {
+    audioTracksSelect.innerHTML = "";
+    const tracks = videoPlayer.audioTracks;
+
+    if (tracks && tracks.length > 1) {
+        tracks.forEach((track, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.textContent = track.label || `Track ${index + 1}`;
+            audioTracksSelect.appendChild(option);
+        });
+
+        audioTracksSelect.addEventListener("change", () => {
+            tracks[audioTracksSelect.value].enabled = true;
+        });
+    } else {
+        audioTracksSelect.style.display = "none";
+    }
+});

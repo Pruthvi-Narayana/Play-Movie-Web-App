@@ -19,14 +19,13 @@
     <!-- ✅ Fix: Wrapped controls inside a new div -->
     <div class="controls-container">
         <input type="range" id="seekBar" value="0" step="0.1">
+        <br>
         <div class="controls">
             <button id="rewind1m">⏪ 1 min</button>
             <button id="rewind10s">◀️ 10s</button>
             <button id="playPause">▶️</button>
             <button id="forward10s">10s ▶️</button>
             <button id="forward1m">1 min ⏩</button>
-            
-
             <div id="thumbnailPreview" class="thumbnail-preview"></div>
         </div>
         <br>
@@ -43,7 +42,12 @@
 
             <label for="contrast">Contrast</label>
             <input type="range" id="contrast" min="0.5" max="2" step="0.1" value="1">
-
+            
+            <label for="audioBoost">Audio Boost</label>
+            <input type="range" id="audioBoost" min="1" max="3" step="0.1" value="1">
+            
+            <select id="audioTracks"></select>
+            
         </div>
     </div>
     
