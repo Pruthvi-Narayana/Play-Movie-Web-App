@@ -46,18 +46,22 @@ async function loadVideo(file) {
     videoPlayer.play();
 }
 
-// 🔄 Convert MKV to MP4 using FFmpeg
+const { createFFmpeg, fetchFile } = FFmpeg.createFFmpeg ? FFmpeg : self.FFmpeg;
+const ffmpeg = createFFmpeg({ log: true });
+
 async function convertMKVtoMP4(file) {
-    if (!ffmpeg.isLoaded()) await ffmpeg.load();
-    const fileName = "input.mkv";
-    const outputFileName = "output.mp4";
+    await ffmpeg.load();
+    ffmpeg.FS("writeFile", "input.mkv", await fetchFile(file));
+    await ffmpeg.run("-i", "input.mkv", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-c:a", "aac", "-b:a", "128k", "output.mp4");
+    
+    const data = ffmpeg.FS("readFile", "output.mp4");
+    const mp4Blob = new Blob([data.buffer], { type: "video/mp4" });
 
-    ffmpeg.FS("writeFile", fileName, await fetchFile(file));
-    await ffmpeg.run("-i", fileName, outputFileName);
-
-    const data = ffmpeg.FS("readFile", outputFileName);
-    return URL.createObjectURL(new Blob([data.buffer], { type: "video/mp4" }));
+    return URL.createObjectURL(mp4Blob);
 }
+
+
+
 
 // ▶️ Play/Pause Toggle
 playPauseBtn.addEventListener("click", () => {
@@ -191,39 +195,56 @@ function updateFilters() {
 
 brightnessControl.addEventListener("input", updateFilters);
 contrastControl.addEventListener("input", updateFilters);
-
-
-const audioContext = new AudioContext();
-const source = audioContext.createMediaElementSource(videoPlayer);
-const gainNode = audioContext.createGain();
-source.connect(gainNode);
-gainNode.connect(audioContext.destination);
-
+let audioContext;
+let source;
 const audioBoostControl = document.getElementById("audioBoost");
+const audioTrackSelect = document.getElementById("audioTrackSelect");
 
-audioBoostControl.addEventListener("input", () => {
-    let boostValue = parseFloat(audioBoostControl.value);
-    gainNode.gain.value = boostValue; // Boost up to 3x
+document.addEventListener("click", () => {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        source = audioContext.createMediaElementSource(videoPlayer);
+        const gainNode = audioContext.createGain();
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // Audio Boost
+        audioBoostControl.addEventListener("input", () => {
+            let boostValue = parseFloat(audioBoostControl.value);
+            gainNode.gain.value = boostValue;
+        });
+    }
+    if (audioContext.state === "suspended") {
+        audioContext.resume();
+    }
 });
 
-const audioTracksSelect = document.getElementById("audioTracks");
-
+// ✅ Handle Audio Tracks (Fixes undefined `audioTracks`)
 videoPlayer.addEventListener("loadedmetadata", () => {
-    audioTracksSelect.innerHTML = "";
-    const tracks = videoPlayer.audioTracks;
+    audioTrackSelect.innerHTML = '<option value="">Select Audio Track</option>';
+    const textTracks = videoPlayer.textTracks; // Alternative method
 
-    if (tracks && tracks.length > 1) {
-        tracks.forEach((track, index) => {
-            const option = document.createElement("option");
-            option.value = index;
-            option.textContent = track.label || `Track ${index + 1}`;
-            audioTracksSelect.appendChild(option);
-        });
-
-        audioTracksSelect.addEventListener("change", () => {
-            tracks[audioTracksSelect.value].enabled = true;
-        });
+    if (textTracks && textTracks.length > 0) {
+        for (let i = 0; i < textTracks.length; i++) {
+            const track = textTracks[i];
+            if (track.kind === "captions" || track.kind === "descriptions") {
+                let option = document.createElement("option");
+                option.value = i;
+                option.textContent = track.label || `Track ${i + 1}`;
+                audioTrackSelect.appendChild(option);
+            }
+        }
     } else {
-        audioTracksSelect.style.display = "none";
+        audioTrackSelect.innerHTML = '<option value="">No Extra Tracks</option>';
+    }
+});
+
+// ✅ Event Listener to Switch Audio Tracks
+audioTrackSelect.addEventListener("change", () => {
+    const selectedIndex = parseInt(audioTrackSelect.value);
+    const textTracks = videoPlayer.textTracks;
+
+    for (let i = 0; i < textTracks.length; i++) {
+        textTracks[i].mode = i === selectedIndex ? "showing" : "hidden";
     }
 });

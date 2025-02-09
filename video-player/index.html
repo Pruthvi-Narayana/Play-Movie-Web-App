@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+
     <title>Custom Video Player</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ffmpeg.js/0.10.1/ffmpeg.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/ffmpeg.js/0.9.8/ffmpeg.min.js"></script> -->
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ffmpeg.js/0.10.1/ffmpeg.min.js"></script>
+
     <div class="video-container">
         <video id="videoPlayer" controls></video>
         <input type="file" id="fileInput" accept="video/*">
         <div id="dropArea">Drag & Drop Video Here</div>
     </div>
-    
-    <!-- ✅ Fix: Wrapped controls inside a new div -->
+
+    <!-- ✅ Wrapped controls inside a new div -->
     <div class="controls-container">
         <input type="range" id="seekBar" value="0" step="0.1">
         <br>
@@ -42,16 +47,18 @@
 
             <label for="contrast">Contrast</label>
             <input type="range" id="contrast" min="0.5" max="2" step="0.1" value="1">
-            
+
             <label for="audioBoost">Audio Boost</label>
             <input type="range" id="audioBoost" min="1" max="3" step="0.1" value="1">
-            
+
             <select id="audioTracks"></select>
-            
+            <select id="audioTrackSelect">
+                <option value="">Select Audio Track</option>
+            </select>
         </div>
     </div>
-    
-    
+
     <script src="script.js"></script>
 </body>
+
 </html>
