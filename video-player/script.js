@@ -50,15 +50,26 @@ const { createFFmpeg, fetchFile } = FFmpeg.createFFmpeg ? FFmpeg : self.FFmpeg;
 const ffmpeg = createFFmpeg({ log: true });
 
 async function convertMKVtoMP4(file) {
-    await ffmpeg.load();
-    ffmpeg.FS("writeFile", "input.mkv", await fetchFile(file));
-    await ffmpeg.run("-i", "input.mkv", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-c:a", "aac", "-b:a", "128k", "output.mp4");
-    
-    const data = ffmpeg.FS("readFile", "output.mp4");
-    const mp4Blob = new Blob([data.buffer], { type: "video/mp4" });
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    loadingOverlay.style.display = "flex"; // Show loader
 
-    return URL.createObjectURL(mp4Blob);
+    try {
+        await ffmpeg.load();
+        ffmpeg.FS("writeFile", "input.mkv", await fetchFile(file));
+        await ffmpeg.run("-i", "input.mkv", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23", "-c:a", "aac", "-b:a", "128k", "output.mp4");
+
+        const data = ffmpeg.FS("readFile", "output.mp4");
+        const mp4Blob = new Blob([data.buffer], { type: "video/mp4" });
+
+        return URL.createObjectURL(mp4Blob);
+    } catch (error) {
+        console.error("MKV to MP4 conversion failed:", error);
+        return null;
+    } finally {
+        loadingOverlay.style.display = "none"; // Hide loader after conversion
+    }
 }
+
 
 
 
